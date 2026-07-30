@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rex工作台">
+<meta name="theme-color" content="#2563eb">
+<title>Rex Pest Control 工作台</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>tailwind.config={theme:{extend:{colors:{primary:'#2563eb','primary-light':'#eff6ff','primary-dark':'#1d4ed8'}}}}</script>
+<style>
+*{-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;margin:0}
+html,body{height:100%}
+#app{height:100vh;height:-webkit-fill-available}
+.nav-item.active{background:#eff6ff;color:#2563eb;border-right:3px solid #2563eb}
+.cal-day:active{background:#eff6ff}
+input,select,textarea{font-size:16px;-webkit-appearance:none;appearance:none;border-radius:8px}
+.btn{cursor:pointer;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:500}
+.btn-primary{background:#2563eb;color:#fff}
+.btn-primary:active{background:#1d4ed8}
+.btn-green{background:#10b981;color:#fff}
+.btn-green:active{background:#059669}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);border:1px solid #e5e7eb}
+.tag{font-size:11px;padding:2px 8px;border-radius:9999px;font-weight:500}
+.t-blue{background:#dbeafe;color:#1d4ed8}
+.t-indigo{background:#e0e7ff;color:#4338ca}
+.t-gray{background:#f3f4f6;color:#374151}
+.t-amber{background:#fef3c7;color:#b45309}
+.t-red{background:#fee2e2;color:#b91c1c}
+</style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+<div id="app" class="flex h-full">
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 -translate-x-full md:relative md:translate-x-0 transition-transform duration-200 flex flex-col">
+<div class="p-5 flex items-center gap-3 border-b border-gray-100">
+<div class="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center text-lg font-bold">R</div>
+<div><h1 class="font-bold text-lg leading-tight">Rex 工作台</h1><p class="text-xs text-gray-500">Pest Control</p ></div>
+</div>
+<nav class="flex-1 px-3 py-4 space-y-1">
+<button onclick="A.nav('today')" data-nav="today" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600"><i class="fa-solid fa-calendar-day w-5 text-center"></i>本日日程</button>
+<button onclick="A.nav('month')" data-nav="month" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600"><i class="fa-solid fa-calendar-days w-5 text-center"></i>本月日程</button>
+<button onclick="A.nav('finance')" data-nav="finance" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600"><i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i>本月收支</button>
+<button onclick="A.nav('done')" data-nav="done" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600"><i class="fa-solid fa-clipboard-check w-5 text-center"></i>已完成</button>
+</nav>
+<div class="p-4 border-t border-gray-100">
+<button onclick="A.demo()" class="w-full text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg py-2"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>载入示例</button>
+</div>
+</aside>
+<div id="ov" class="fixed inset-0 bg-black/30 z-20 hidden md:hidden" onclick="A.sb()"></div>
+<main class="flex-1 flex flex-col min-w-0">
+<header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button onclick="A.sb()" class="md:hidden text-gray-500"><i class="fa-solid fa-bars text-xl"></i></button>
+<h2 id="title" class="text-lg font-bold">本日日程</h2>
+</div>
+<div id="cdate" class="text-sm text-gray-500"></div>
+</header>
+<div id="content" class="flex-1 overflow-auto p-4"></div>
+</main>
+</div>
+<div id="dmodal" class="fixed inset-0 z-50 hidden">
+<div class="absolute inset-0 bg-black/40" onclick="A.cd()"></div>
+<div id="dpanel" class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col translate-x-full transition-transform duration-200">
+<div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-primary-light">
+<h3 id="dtitle" class="font-bold text-lg">客户详情</h3>
+<button onclick="A.cd()" class="text-gray-500 w-8 h-8 rounded-full hover:bg-white/60 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+</div>
+<div class="flex-1 overflow-auto p-5 space-y-4">
+<input type="hidden" id="f-id">
+<div class="grid grid-cols-2 gap-4">
+<div><label class="block text-xs text-gray-500 mb-1">预约日期</label><input type="date" id="f-date" class="w-full border border-gray-300 rounded-lg px-3 py-2"></div>
+<div><label class="block text-xs text-gray-500 mb-1">预约时间</label><input type="time" id="f-time" class="w-full border border-gray-300 rounded-lg px-3 py-2"></div>
+</div>
+<div><label class="block text-xs text-gray-500 mb-1">地址</label>
+<div class="flex gap-2"><input type="text" id="f-addr" placeholder="123 Main St, Auckland" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 min-w-0"><a id="f-map" href=" " target="_blank" class="shrink-0 px-3 py-2 bg-gray-100 text-gray-600 rounded-lg"><i class="fa-solid fa-map-location-dot"></i></a ></div>
+</div>
+<div><label class="block text-xs text-gray-500 mb-1">联系电话</label><input type="tel" id="f-tel" placeholder="客人手机号" class="w-full border border-gray-300 rounded-lg px-3 py-2"></div>
+<div><label class="block text-xs text-gray-500 mb-1">服务类型</label><select id="f-type" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"><option value="月度">月度（每月同一天自动预约）</option><option value="半月">半月（每两周自动预约）</option><option value="单次">单次</option><option value="回访">回访</option><option value="停止服务">停止服务</option></select></div>
+<div><label class="block text-xs text-gray-500 mb-1">金额（$）</label><input type="number" id="f-amt" step="0.01" min="0" placeholder="0.00" class="w-full border border-gray-300 rounded-lg px-3 py-2"></div>
+<div><label class="block text-xs text-gray-500 mb-1">服务报告</label><textarea id="f-rpt" rows="4" placeholder="服务内容、药剂、注意事项..." class="w-full border border-gray-300 rounded-lg px-3 py-2 resize-none"></textarea></div>
+</div>
+<div class="p-5 border-t border-gray-100 bg-gray-50 space-y-2">
+<button onclick="A.save()" class="btn btn-primary w-full"><i class="fa-solid fa-floppy-disk mr-2"></i>保存</button>
+<button id="btn-done" onclick="A.done()" class="btn btn-green w-full"><i class="fa-solid fa-check mr-2"></i>完成服务</button>
+<button id="btn-del" onclick="A.del()" class="w-full border border-red-200 text-red-500 py-2 rounded-lg hidden"><i class="fa-regular fa-trash-can mr-2"></i>删除</button>
+</div>
+</div>
+</div>
+<div id="daymodal" class="fixed inset-0 z-40 hidden">
+<div class="absolute inset-0 bg-black/40" onclick="A.cday()"></div>
+<div id="daypanel" class="absolute bottom-0 md:right-0 h-[80%] md:h-full w-full md:max-w-sm bg-white rounded-t-2xl md:rounded-none flex flex-col translate-y-full md:translate-x-full transition-transform duration-200">
+<div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-primary-light">
+<h3 id="daytitle" class="font-bold text-lg">日程</h3>
+<button onclick="A.cday()" class="text-gray-500 w-8 h-8 rounded-full hover:bg-white/60 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+</div>
+<div id="daycontent" class="flex-1 overflow-auto p-5"></div>
+<div class="p-5 border-t border-gray-100 bg-gray-50"><button onclick="A.open(null,A.daydate)" class="btn btn-primary w-full"><i class="fa-solid fa-plus mr-2"></i>在该日新增预约</button></div>
+</div>
+</div>
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-5 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-[60]"></div>
+<script>
+function uuid(){return(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c=='x'?r:(r&0x3|0x8)).toString(16)})}
+const A={
+data:{s:[],e:[]},
+page:'today',
+mv:new Date(),
+daydate:null,
+init(){this.load();document.getElementById('cdate').textContent=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});this.nav('today')},
+load(){try{const r=localStorage.getItem('rexData');if(r)this.data=JSON.parse(r)}catch(e){}},
+save(){localStorage.setItem('rexData',JSON.stringify(this.data))},
+nav(p){this.page=p;document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.nav===p));const t={today:'本日日程',month:'本月日程',finance:'本月收支',done:'已完成'};document.getElementById('title').textContent=t[p];if(innerWidth<768)this.sb(false);this.render()},
+render(){const c=document.getElementById('content');c.innerHTML='';if(this.page==='today')this.rToday(c);else if(this.page==='month')this.rMonth(c);else if(this.page==='finance')this.rFin(c);else if(this.page==='done')this.rDone(c)},
+tfmt(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${da}`},
+pdate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)},
+mlabel(d){return d.toLocaleDateString('zh-CN',{year:'numeric',month:'long'})},
+tcolor(t){return{月度:'t-blue',半月:'t-indigo',单次:'t-gray',回访:'t-amber',停止服务:'t-red'}[t]||'t-gray'},
+esc(s){return s==null?'':String(s).replace(/[&<>"']/g,m=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[m]))},
+toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('opacity-0');setTimeout(()=>t.classList.add('opacity-0'),2500)},
+sb(f){const s=document.getElementById('sidebar'),o=document.getElementById('ov');const sh=f==null?s.classList.contains('-translate-x-full'):f;s.classList.toggle('-translate-x-full',!sh);o.classList.toggle('hidden',!sh)},
+rToday(c){const t=this.tfmt(new Date());const l=this.data.s.filter(x=>x.date===t&&x.status==='scheduled').sort((a,b)=>(a.time||'').localeCompare(b.time||''));let h=`<div class="flex items-center justify-between mb-6"><div class="flex items-end gap-3"><span class="text-4xl font-bold text-primary">${l.length}</span><span class="text-gray-500 mb-1">个今日待服务</span></div><button onclick="A.open()" class="btn btn-primary">新增预约</button></div>`;if(!l.length){h+=`<div class="card p-10 text-center border-dashed"><div class="w-16 h-16 bg-primary-light text-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-calendar-check"></i></div><h3 class="font-bold mb-1">今天还没有预约</h3><p class="text-sm text-gray-500 mb-4">点击右上角新增，或从月历中预约。</p ><button onclick="A.nav('month')" class="text-primary text-sm">查看本月日程</button></div>`}else{h+=`<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;l.forEach(s=>{h+=`<div onclick="A.open('${s.id}')" class="card p-4 border-l-4 border-primary cursor-pointer"><div class="flex justify-between items-start mb-2"><span class="text-lg font-bold">${s.time||'--:--'}</span><span class="tag ${this.tcolor(s.type)}">${s.type}</span></div><div class="text-sm text-gray-600 mb-1"><i class="fa-solid fa-location-dot text-primary mr-2"></i>${this.esc(s.addr)||'未填写'}</div><div class="text-sm text-gray-500"><i class="fa-solid fa-phone text-primary mr-2"></i>${this.esc(s.tel)||'未填写'}</div><div class="mt-3 flex justify-between"><span class="text-sm font-semibold">$${Number(s.amt||0).toFixed(2)}</span><span class="text-xs text-primary">详情</span></div></div>`});h+=`</div>`}c.innerHTML=h},
+rMonth(c){let h=`<div class="flex items-center justify-between mb-4"><div class="flex items-center gap-2"><button onclick="A.sm(-1)" class="w-8 h-8 rounded-lg hover:bg-gray-200"><i class="fa-solid fa-chevron-left"></i></button><h3 class="text-lg font-bold min-w-[120px] text-center">${this.mlabel(this.mv)}</h3><button onclick="A.sm(1)" class="w-8 h-8 rounded-lg hover:bg-gray-200"><i class="fa-solid fa-chevron-right"></i></button></div><button onclick="A.mv=new Date();A.render()" class="text-sm text-primary">今天</button></div>`;const days=['日','一','二','三','四','五','六'];h+=`<div class="card overflow-hidden"><div class="grid grid-cols-7 bg-gray-50 border-b">`;days.forEach(d=>h+=`<div class="py-2 text-center text-xs font-semibold text-gray-500">${d}</div>`);h+=`</div><div class="grid grid-cols-7">`;const y=this.mv.getFullYear(),m=this.mv.getMonth(),fd=new Date(y,m,1),st=new Date(y,m,1-fd.getDay()),today=this.tfmt(new Date());for(let i=0;i<42;i++){const d=new Date(st.getFullYear(),st.getMonth(),st.getDate()+i),ds=this.tfmt(d),inM=d.getMonth()===m,isT=ds===today;const sv=this.data.s.filter(x=>x.date===ds&&x.status==='scheduled');let dots=sv.slice(0,4).map(()=>'<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>').join('');h+=`<div onclick="A.openDay('${ds}')" class="cal-day min-h-[60px] md:min-h-[100px] border-b border-r border-gray-100 p-1.5 md:p-2 cursor-pointer flex flex-col justify-between ${inM?'bg-white':'bg-gray-50 text-gray-400'}"><span class="text-xs md:text-sm w-5 h-5 md:w-6 md:h-6 flex items-center justify-center rounded-full ${isT?'bg-primary text-white':''}">${d.getDate()}</span><div class="flex flex-wrap gap-1 mt-1">${dots}</div></div>`}h+=`</div></div>`;c.innerHTML=h},
+sm(d){this.mv=new Date(this.mv.getFullYear(),this.mv.getMonth()+d,1);this.render()},
+openDay(ds){this.daydate=ds;const m=document.getElementById('daymodal'),p=document.getElementById('daypanel'),cc=document.getElementById('daycontent');document.getElementById('daytitle').textContent=this.pdate(ds).toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'});const l=this.data.s.filter(x=>x.date===ds).sort((a,b)=>(b.status==='scheduled'?1:0)-(a.status==='scheduled'?1:0)||(a.time||'').localeCompare(b.time||''));if(!l.length){cc.innerHTML=`<div class="text-center py-10 text-gray-500"><i class="fa-regular fa-calendar-xmark text-3xl mb-3 text-gray-300"></i><p class="text-sm">这一天还没有预约</p ></div>`}else{cc.innerHTML=l.map(s=>`<div onclick="A.open('${s.id}')" class="mb-3 card p-3 cursor-pointer"><div class="flex justify-between mb-1"><span class="font-bold">${s.time||'--:--'}</span><span class="tag ${this.tcolor(s.type)}">${s.type}</span></div><div class="text-sm text-gray-600 truncate">${this.esc(s.addr)||'无地址'}</div><div class="mt-2 flex justify-between"><span class="text-xs ${s.status==='completed'?'text-emerald-600 font-medium':'text-gray-400'}">${s.status==='completed'?'已完成':'待服务'}</span><span class="text-sm font-semibold">$${Number(s.amt||0).toFixed(2)}</span></div></div>`).join
